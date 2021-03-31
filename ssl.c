@@ -1,15 +1,23 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include "ssl.h"
 
 void
-ssl_free_context (SSL* ssl, SSL_CTX* context)
+ssl_free_context (SSL* ssl)
 {
   puts ("freeing SSL object/context");
-  if (context != NULL)
-    SSL_CTX_free (context);
+  SSL_CTX* ctx = SSL_get_SSL_CTX (ssl);
+  int sfd = SSL_get_fd (ssl);
+  if (ctx != NULL)
+    SSL_CTX_free (ctx);
   if (ssl != NULL)
     SSL_free (ssl);
+  if (sfd >= 0)
+  {
+    SSL_shutdown (ssl); /* pray that this returns 0 */
+    close (sfd);
+  }
 }
 
 void
@@ -41,7 +49,7 @@ ssl_create_ssl (SSL_CTX* context)
   if (ssl == NULL)
   {
     fputs ("SSL_new() failed", stderr);
-    ssl_free_context (ssl, context);
+    ssl_free_context (ssl);
     return NULL;
   }
   return ssl;

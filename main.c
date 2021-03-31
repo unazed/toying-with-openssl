@@ -30,14 +30,13 @@ main (int argc, char** argv)
   } else if (!ssl_connect_tcp_connection (ssl, sockfd))
   {
     puts ("failed to connect SSL socket");
-    goto out_sock_close;
+    goto out_ssl_free;
   }
   pfd.fd = sockfd;
   pfd.events = POLLIN;
 
   ssl_tcp_write (ssl, "GET / HTTP/1.1\r\n\r\n");
   puts ("sent data, entering polling region");
-
   while (true)
   {
     switch (poll (&pfd, 1, 1000))
@@ -46,22 +45,18 @@ main (int argc, char** argv)
         puts ("polling...");
         break;
       case POLL_ERR:
-        goto out_sock_shutdown;
+        break;
       default:
         memset (pollin_data, 0, sizeof (pollin_data));
         if (!SSL_read (ssl, pollin_data, sizeof (pollin_data)))
         {
           puts ("received EOF/SSL_read() error, closing...");
-          goto out_sock_shutdown;
+          break;
         }
-        printf ("received: %s\n", pollin_data);
+        printf ("received: %s, len: %zu\n", pollin_data, strlen (pollin_data));
     }
   }
 
-out_sock_shutdown:
-  SSL_shutdown (ssl);
-out_sock_close:
-  close (sockfd);
 out_ssl_free:
-  ssl_free_context (ssl, ctx);
+  ssl_free_context (ssl);
 }

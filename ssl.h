@@ -6,7 +6,7 @@
 #include <string.h>
 
 void
-ssl_free_context (SSL*, SSL_CTX*);
+ssl_free_context (SSL*);
 
 void
 ssl_init_openssl (void);
