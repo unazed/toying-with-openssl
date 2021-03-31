@@ -5,22 +5,16 @@
 #include <openssl/err.h>
 #include <string.h>
 
-void
-ssl_free_context (SSL*);
+void ssl_free_context (SSL *);
 
-void
-ssl_init_openssl (void);
+void ssl_init_openssl (void);
 
-SSL_CTX*
-ssl_create_context (void);
+SSL_CTX *ssl_create_context (void);
 
-SSL*
-ssl_create_ssl (SSL_CTX* context);
+SSL *ssl_create_ssl (SSL_CTX * context);
 
-bool
-ssl_connect_tcp_connection (SSL* ssl, int sockfd);
+bool ssl_connect_tcp_connection (SSL * ssl, int sockfd);
 
-void
-ssl_tcp_write (SSL* ssl, const char* data);
+void ssl_tcp_write (SSL * ssl, const char *data);
 
 #endif

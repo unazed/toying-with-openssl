@@ -10,10 +10,10 @@
 #define POLL_EXPIRE      (0)
 
 void
-main (int argc, char** argv)
+main (int argc, char **argv)
 {
-  SSL_CTX* ctx = ssl_create_context ();
-  SSL* ssl = ssl_create_ssl (ctx);
+  SSL_CTX *ctx = ssl_create_context ();
+  SSL *ssl = ssl_create_ssl (ctx);
   struct pollfd pfd;
   char pollin_data[65536];
   memset (pollin_data, 0, sizeof (pollin_data));
@@ -24,38 +24,40 @@ main (int argc, char** argv)
 
   int sockfd = create_tcp_connection (argv[1], argv[2]);
   if (sockfd < 0)
-  {
-    printf ("failed to connect to %s:%s\n", argv[1], argv[2]);
-    goto out_ssl_free;
-  } else if (!ssl_connect_tcp_connection (ssl, sockfd))
-  {
-    puts ("failed to connect SSL socket");
-    goto out_ssl_free;
-  }
+    {
+      printf ("failed to connect to %s:%s\n", argv[1], argv[2]);
+      goto out_ssl_free;
+    }
+  else if (!ssl_connect_tcp_connection (ssl, sockfd))
+    {
+      puts ("failed to connect SSL socket");
+      goto out_ssl_free;
+    }
   pfd.fd = sockfd;
   pfd.events = POLLIN;
 
   ssl_tcp_write (ssl, "GET / HTTP/1.1\r\n\r\n");
   puts ("sent data, entering polling region");
   while (true)
-  {
-    switch (poll (&pfd, 1, 1000))
     {
-      case POLL_EXPIRE:
-        puts ("polling...");
-        break;
-      case POLL_ERR:
-        break;
-      default:
-        memset (pollin_data, 0, sizeof (pollin_data));
-        if (!SSL_read (ssl, pollin_data, sizeof (pollin_data)))
-        {
-          puts ("received EOF/SSL_read() error, closing...");
-          goto out_ssl_free;
-        }
-        printf ("received: %s, len: %zu\n", pollin_data, strlen (pollin_data));
+      switch (poll (&pfd, 1, 1000))
+	      {
+	        case POLL_EXPIRE:
+        	  puts ("polling...");
+        	  break;
+        	case POLL_ERR:
+        	  break;
+        	default:
+        	  memset (pollin_data, 0, sizeof (pollin_data));
+        	  if (!SSL_read (ssl, pollin_data, sizeof (pollin_data)))
+        	    {
+        	      puts ("received EOF/SSL_read() error, closing...");
+        	      goto out_ssl_free;
+        	    }
+          	  printf ("received: %s, len: %zu\n", pollin_data,
+          		  strlen (pollin_data));
+    	  }
     }
-  }
 
 out_ssl_free:
   ssl_free_context (ssl);
