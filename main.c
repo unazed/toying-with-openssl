@@ -51,7 +51,7 @@ main (int argc, char** argv)
         if (!SSL_read (ssl, pollin_data, sizeof (pollin_data)))
         {
           puts ("received EOF/SSL_read() error, closing...");
-          break;
+          goto out_ssl_free;
         }
         printf ("received: %s, len: %zu\n", pollin_data, strlen (pollin_data));
     }
