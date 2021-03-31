@@ -9,15 +9,15 @@ ssl_free_context (SSL* ssl)
   puts ("freeing SSL object/context");
   SSL_CTX* ctx = SSL_get_SSL_CTX (ssl);
   int sfd = SSL_get_fd (ssl);
-  if (ctx != NULL)
-    SSL_CTX_free (ctx);
-  if (ssl != NULL)
-    SSL_free (ssl);
   if (sfd >= 0)
   {
     SSL_shutdown (ssl); /* pray that this returns 0 */
     close (sfd);
   }
+  if (ctx != NULL)
+    SSL_CTX_free (ctx);
+  if (ssl != NULL)
+    SSL_free (ssl);
 }
 
 void
