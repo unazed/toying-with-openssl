@@ -13,7 +13,7 @@ create_tcp_connection (const char *hostname, const char *port)
     {
       sockfd = socket (res->ai_family, res->ai_socktype, res->ai_protocol);
       if (sockfd < 0)
-	      {
+	{
       	  puts ("failed socket ()");
       	  continue;
       	}
